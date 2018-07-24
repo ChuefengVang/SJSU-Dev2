@@ -71,13 +71,16 @@ CORTEX_M4F = -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 \
 			 -fabi-version=0
 # CORTEX_M4F  = -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=softfp -mthumb
 OPTIMIZE  = -O0 -fmessage-length=0 -ffunction-sections -fdata-sections -fno-exceptions \
-               -fsingle-precision-constant -fno-rtti
+               -fsingle-precision-constant
+CPPOPTIMIZE = -fno-rtti
 DEBUG     = -g
 WARNINGS  = -Wall -Wextra -Wshadow -Wlogical-op -Wfloat-equal \
             -Wdouble-promotion -Wduplicated-cond -Wlogical-op -Wswitch \
-            -Wnull-dereference -Wold-style-cast -Wuseless-cast -Wformat=2 \
-            -Wundef -Wconversion -Woverloaded-virtual -Wsuggest-final-types \
-            -Wsuggest-final-methods -Wsuggest-override
+            -Wnull-dereference -Wformat=2 \
+            -Wundef -Wconversion -Wsuggest-final-types \
+            -Wsuggest-final-methods
+CPPWARNINGS = -Wold-style-cast -Woverloaded-virtual -Wsuggest-override \
+              -Wuseless-cast
 DEFINES   = -DARM_MATH_CM4=1 -D__FPU_PRESENT=1U
 DISABLED_WARNINGS = -Wno-main -Wno-variadic-macros
 COMMON_FLAGS = $(CORTEX_M4F) $(OPTIMIZE) $(DEBUG) $(WARNINGS)  $(DEFINES) \
@@ -85,14 +88,13 @@ COMMON_FLAGS = $(CORTEX_M4F) $(OPTIMIZE) $(DEBUG) $(WARNINGS)  $(DEFINES) \
 CFLAGS_COMMON = $(COMMON_FLAGS) \
     -I"$(CURRENT_DIRECTORY)/" \
     -I"$(LIB_DIR)/" \
-    -I"$(LIB_DIR)/newlib" \
-    -I"$(LIB_DIR)/third_party/" \
-    -I"$(LIB_DIR)/third_party/FreeRTOS" \
-    -I"$(LIB_DIR)/third_party/FreeRTOS/trace" \
-    -I"$(LIB_DIR)/third_party/FreeRTOS/include" \
-    -I"$(LIB_DIR)/third_party/FreeRTOS/portable" \
-    -I"$(LIB_DIR)/third_party/FreeRTOS/portable/no_mpu" \
-    -I"$(DBC_DIR)" \
+    -isystem"$(LIB_DIR)/L0_LowLevel/SystemFiles" \
+    -isystem"$(LIB_DIR)/third_party/" \
+    -isystem"$(LIB_DIR)/third_party/FreeRTOS/Source" \
+    -isystem"$(LIB_DIR)/third_party/FreeRTOS/Source/trace" \
+    -isystem"$(LIB_DIR)/third_party/FreeRTOS/Source/include" \
+    -isystem"$(LIB_DIR)/third_party/FreeRTOS/Source/portable" \
+    -isystem"$(LIB_DIR)/third_party/FreeRTOS/Source/portable/GCC/ARM_CM4F" \
     -MMD -MP -c
 
 ifeq ($(MAKECMDGOALS), test)
@@ -102,8 +104,10 @@ CFLAGS = -fprofile-arcs -fPIC -fexceptions -fno-inline \
          -fno-elide-constructors \
          $(filter-out $(CORTEX_M4F) $(OPTIMIZE), $(CFLAGS_COMMON)) \
          -O0
+CPPFLAGS = $(CFLAGS)
 else
 CFLAGS = $(CFLAGS_COMMON) -Wframe-larger-than=2048
+CPPFLAGS = $(CFLAGS) $(CPPWARNINGS) $(CPPOPTIMIZE)
 endif
 
 LINKFLAGS = $(COMMON_FLAGS) \
@@ -117,7 +121,8 @@ LINKFLAGS = $(COMMON_FLAGS) \
 FILE_EXCLUDES = grep -v  \
 				-e "$(LIB_DIR)/third_party/" \
 				-e "$(LIB_DIR)/L0_LowLevel/SystemFiles" \
-				-e "$(LIB_DIR)/L0_LowLevel/LPC40xx.h"
+				-e "$(LIB_DIR)/L0_LowLevel/LPC40xx.h" \
+				-e "$(LIB_DIR)/L0_LowLevel/FreeRTOSConfig.h"
 # Find all files that end with "_test.cpp"
 SOURCE_TESTS  = $(shell find $(SOURCE) \
                          -name "*_test.cpp" \
@@ -292,7 +297,7 @@ $(OBJ_DIR)/%.o: %.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: Cross ARM C++ Compiler'
 	@mkdir -p "$(dir $@)"
-	@$(CPPC) $(CFLAGS) -std=c++17 -MF"$(@:%.o=%.d)" -MT"$(@)" -o "$@" "$<"
+	@$(CPPC) $(CPPFLAGS) -std=c++17 -MF"$(@:%.o=%.d)" -MT"$(@)" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 
@@ -324,7 +329,7 @@ $(OBJ_DIR)/%.o: $(LIB_DIR)/%.cpp
 	@echo 'Building C++ file: $<'
 	@echo 'Invoking: Cross ARM C++ Compiler'
 	@mkdir -p "$(dir $@)"
-	@$(CPPC) $(CFLAGS) -std=c++17 -MF"$(@:%.o=%.d)" -MT"$(@)" -o "$@" "$<"
+	@$(CPPC) $(CPPFLAGS) -std=c++17 -MF"$(@:%.o=%.d)" -MT"$(@)" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 
