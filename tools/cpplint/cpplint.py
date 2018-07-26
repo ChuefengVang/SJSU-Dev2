@@ -281,17 +281,13 @@ _LEGACY_ERROR_CATEGORIES = [
 # flag. By default all errors are on, so only add here categories that should be
 # off by default (i.e., categories that must be enabled by the --filter= flags).
 # All entries here should start with a '-' or '+', as in the --filter= flag.
-_DEFAULT_FILTERS = ['-build/include_alpha']
+_DEFAULT_FILTERS = []
 
 # The default list of categories suppressed for C (not C++) files.
-_DEFAULT_C_SUPPRESSED_CATEGORIES = [
-    'readability/casting',
-    ]
+_DEFAULT_C_SUPPRESSED_CATEGORIES = []
 
 # The default list of categories suppressed for Linux Kernel files.
-_DEFAULT_KERNEL_SUPPRESSED_CATEGORIES = [
-    'whitespace/tab',
-    ]
+_DEFAULT_KERNEL_SUPPRESSED_CATEGORIES = []
 
 # We used to check for high-bit characters, but after much discussion we
 # decided those were OK, as long as they were in UTF-8 and didn't represent
