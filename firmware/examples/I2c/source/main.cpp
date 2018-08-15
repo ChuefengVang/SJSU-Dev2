@@ -7,7 +7,7 @@
 constexpr uint8_t kFirstI2cAddress = 0x08;
 constexpr uint8_t kLastI2cAddress  = 0x78;
 
-constexpr uint8_t kAccelerometerAddress = 0x1C;
+constexpr uint8_t kAccelerometerAddress = 0x48;
 uint8_t initialization_sequence[]       = { 0x2A, 0x01 };
 uint8_t byte                            = 0x0D;
 
@@ -27,7 +27,7 @@ int main(void)
     i2c.Write(kAccelerometerAddress, initialization_sequence,
               sizeof(initialization_sequence));
 
-    while (true)
+/*    while (true)
     {
         DEBUG_PRINT("Starting Scan...");
         I2cInterface::Status status;
@@ -49,5 +49,5 @@ int main(void)
         DEBUG_PRINT("Waiting 5s before starting the scan again...");
         Delay(5000);
     }
-    return 0;
+*/    return 0;
 }
